@@ -10,6 +10,8 @@ app = FastAPI(title=settings.app_name, version=settings.app_version)
 # Routers
 app.include_router(agents_router.router)
 app.include_router(convs_router.router)
+from .routers import ai as ai_router
+app.include_router(ai_router.router)
 
 
 @app.get("/health")

@@ -1,5 +1,7 @@
 from typing import Dict, List, Optional
+from datetime import datetime
 from ..models.conversation import Conversation, Message
+from .acd import acd_service
 
 
 class ConversationService:
@@ -10,6 +12,8 @@ class ConversationService:
     def create(self, conv: Conversation) -> Conversation:
         self._convs[conv.id] = conv
         self._msgs.setdefault(conv.id, [])
+        # try auto-assign
+        acd_service.assign(conv)
         return conv
 
     def get(self, conv_id: str) -> Optional[Conversation]:
@@ -27,6 +31,24 @@ class ConversationService:
 
     def messages(self, conv_id: str) -> List[Message]:
         return list(self._msgs.get(conv_id, []))
+
+    def close(self, conv_id: str, reason: str | None = None) -> Optional[Conversation]:
+        conv = self._convs.get(conv_id)
+        if not conv:
+            return None
+        conv.status = "closed"
+        conv.closed_at = datetime.utcnow()
+        acd_service.release(conv)
+        if reason:
+            self.add_message(
+                Message(
+                    id=f"sys-{conv_id}-{int(conv.closed_at.timestamp())}",
+                    conversation_id=conv_id,
+                    sender="system",
+                    content=f"conversation closed: {reason}",
+                )
+            )
+        return conv
 
 
 conversation_service = ConversationService()

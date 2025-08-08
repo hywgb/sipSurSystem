@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException
-from ..models.conversation import Conversation, Message
+from ..models.conversation import Conversation, Message, CloseConversation
 from ..services.conversations import conversation_service
+from ..services.acd import acd_service
 
 router = APIRouter(prefix="/conversations", tags=["conversations"])
 
@@ -35,3 +36,20 @@ def send_message(conv_id: str, msg: Message) -> Message:
 @router.get("/{conv_id}/messages")
 def list_messages(conv_id: str) -> list[Message]:
     return conversation_service.messages(conv_id)
+
+
+@router.post("/{conv_id}/assign")
+def assign_conversation(conv_id: str) -> Conversation:
+    c = conversation_service.get(conv_id)
+    if not c:
+        raise HTTPException(status_code=404, detail="conversation not found")
+    acd_service.assign(c)
+    return c
+
+
+@router.post("/{conv_id}/close")
+def close_conversation(conv_id: str, body: CloseConversation) -> Conversation:
+    c = conversation_service.close(conv_id, body.reason)
+    if not c:
+        raise HTTPException(status_code=404, detail="conversation not found")
+    return c
