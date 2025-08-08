@@ -1,0 +1,1 @@
+# In-memory services for bootstrap; replace with DB-backed implementations later
