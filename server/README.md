@@ -20,6 +20,7 @@ Endpoints
 - Health: GET /health
 - Version: GET /version
 - Agents: PUT /agents/{id}, GET /agents, GET /agents/{id}, DELETE /agents/{id}
+- Agents (update/状态): PATCH /agents/{id}, POST /agents/{id}/online, POST /agents/{id}/offline
 - Conversations: POST /conversations, GET /conversations?status=, GET /conversations/{id}
 - Messages: POST /conversations/{id}/messages, GET /conversations/{id}/messages
 - Assign/Close: POST /conversations/{id}/assign, POST /conversations/{id}/close
